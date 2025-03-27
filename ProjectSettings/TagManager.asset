@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - box
+  - slot
+  - sword
   layers:
   - Default
   - TransparentFX
