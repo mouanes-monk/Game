@@ -54,19 +54,28 @@ public class PlayerGrab : MonoBehaviour
         }
     }
 
-    void DropObject()
+  void DropObject()
+{
+    if (grabbedObject)
     {
-        if (grabbedObject)
-        {
-            grabbedObject.transform.SetParent(null, true);
-            grabbedRb.isKinematic = false;
+        // 1. Unparent
+        grabbedObject.transform.SetParent(null, true);
 
-            // **Restore movement speed and rotation**
-            isHolding = false;
-            playerMovement.moveSpeed = normalMovementSpeed;
-            playerMovement.canRotate = true;
+        // 2. Re-enable physics
+        
 
-            grabbedObject = null;
-        }
+        // 3. Force the physics engine to recalc transforms
+        Physics.SyncTransforms();
+        grabbedRb.WakeUp(); // ensure the rigidbody isn't sleeping
+
+        // 4. Restore player movement
+        isHolding = false;
+        playerMovement.moveSpeed = normalMovementSpeed;
+        playerMovement.canRotate = true;
+
+        // 5. Clear reference
+        grabbedObject = null;
     }
+}
+
 }
