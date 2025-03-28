@@ -8,10 +8,12 @@ public class PlayerMovement : MonoBehaviour
     public float rotationSpeed = 10f; // Speed of rotation
   public float rayDistance = 2f; // Distance of the ray
   public bool canRotate = true; // Add this variable
+     public Animator animator; // Make it public
+    private CharacterController controller;
 
     public LayerMask detectionLayer;
     void Start()
-    {
+    { animator = GetComponentInChildren<Animator>();
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true; // Prevents unwanted rotation
     }
@@ -38,7 +40,16 @@ public class PlayerMovement : MonoBehaviour
 
         // Set movement direction
         moveDirection = new Vector3(moveX, 0f, moveZ).normalized;
-
+        
+        if (moveDirection.magnitude > 0.1f)
+        {
+           
+            animator.SetFloat("Speed", moveSpeed);
+        }
+        else
+        {
+            animator.SetFloat("Speed", 0);
+        }
         // Rotate player to face movement direction
         if (canRotate && moveDirection != Vector3.zero)  // Only rotate if moving
         {

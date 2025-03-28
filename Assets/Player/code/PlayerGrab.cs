@@ -10,9 +10,9 @@ public class PlayerGrab : MonoBehaviour
     private GameObject grabbedObject;
     private Rigidbody grabbedRb;
     private PlayerMovement playerMovement;
-
+public Animator animator; 
     void Start()
-    {
+    {  animator = GetComponentInChildren<Animator>();
         playerMovement = GetComponent<PlayerMovement>();
         normalMovementSpeed = playerMovement.moveSpeed;
     }
@@ -39,7 +39,7 @@ public class PlayerGrab : MonoBehaviour
                 grabbedRb = grabbedObject.GetComponent<Rigidbody>();
 
                 if (grabbedRb)
-                {
+                { animator.SetBool("Grab",true);
                     grabbedRb.isKinematic = true;
                     grabbedObject.transform.SetParent(holdPosition, true);
                     grabbedObject.transform.localPosition = Vector3.zero;
@@ -69,6 +69,7 @@ public class PlayerGrab : MonoBehaviour
         grabbedRb.WakeUp(); // ensure the rigidbody isn't sleeping
 
         // 4. Restore player movement
+        animator.SetBool("Grab",false);
         isHolding = false;
         playerMovement.moveSpeed = normalMovementSpeed;
         playerMovement.canRotate = true;
