@@ -3,16 +3,19 @@ using UnityEngine;
 public class PlayerGrab : MonoBehaviour
 {
     public Transform holdPosition; // Where the object is held
-    public float slowMovementSpeed = 2f; // Movement speed when holding
+    public float slowMovementSpeed = 2f;
     private float normalMovementSpeed;
     private bool isHolding = false;
 
     private GameObject grabbedObject;
     private Rigidbody grabbedRb;
     private PlayerMovement playerMovement;
-public Animator animator; 
+    public Animator animator;
+    public  float grabRange = 2.5f;
+
     void Start()
-    {  animator = GetComponentInChildren<Animator>();
+    {  
+        animator = GetComponentInChildren<Animator>();
         playerMovement = GetComponent<PlayerMovement>();
         normalMovementSpeed = playerMovement.moveSpeed;
     }
@@ -21,7 +24,7 @@ public Animator animator;
     {
         if (Input.GetKeyDown(KeyCode.E)) // Press E to grab/drop
         {
-            if (grabbedObject == null)
+            if (!isHolding)
                 TryGrab();
             else
                 DropObject();
@@ -31,7 +34,15 @@ public Animator animator;
     void TryGrab()
     {
         RaycastHit hit;
-        if (Physics.Raycast(transform.position, transform.forward, out hit, 2f))
+        // **Increased range**
+        float sphereRadius = 0.5f; // **Wider detection**
+
+        // **Fix Raycast Position: Start at chest height, not feet**
+        Vector3 rayOrigin = transform.position + Vector3.up * 1.2f; // Chest-level cast
+        Vector3 rayDirection = transform.forward;
+
+        // **Use SphereCast for better object detection**
+        if (Physics.SphereCast(rayOrigin, sphereRadius, rayDirection, out hit, grabRange))
         {
             if (hit.collider.CompareTag("box")) 
             {
@@ -39,44 +50,52 @@ public Animator animator;
                 grabbedRb = grabbedObject.GetComponent<Rigidbody>();
 
                 if (grabbedRb)
-                { animator.SetBool("Grab",true);
+                {   
+                    animator.SetBool("Grab", true);
                     grabbedRb.isKinematic = true;
-                    grabbedObject.transform.SetParent(holdPosition, true);
-                    grabbedObject.transform.localPosition = Vector3.zero;
-                    grabbedObject.transform.rotation = Quaternion.identity;
 
-                    // **Disable rotation and slow movement**
+                    // **Align object with hands**
+                    grabbedObject.transform.SetParent(holdPosition, true);
+                    grabbedObject.transform.position = holdPosition.position;
+                    grabbedObject.transform.rotation = holdPosition.rotation;
+
                     isHolding = true;
                     playerMovement.moveSpeed = slowMovementSpeed;
-                    playerMovement.canRotate = false; // Stop player from rotating
+                    playerMovement.canRotate = false;
                 }
             }
         }
     }
 
-  void DropObject()
-{
-    if (grabbedObject)
+    void DropObject()
     {
-        // 1. Unparent
-        grabbedObject.transform.SetParent(null, true);
+        if (grabbedObject)
+        {
+            grabbedObject.transform.SetParent(null, true);
 
-        // 2. Re-enable physics
-        
+            grabbedRb.isKinematic = false; 
+            grabbedRb.WakeUp(); 
+            
+            Physics.SyncTransforms(); 
 
-        // 3. Force the physics engine to recalc transforms
-        Physics.SyncTransforms();
-        grabbedRb.WakeUp(); // ensure the rigidbody isn't sleeping
+            animator.SetBool("Grab", false);
+            isHolding = false;
+            playerMovement.moveSpeed = normalMovementSpeed;
+            playerMovement.canRotate = true;
 
-        // 4. Restore player movement
-        animator.SetBool("Grab",false);
-        isHolding = false;
-        playerMovement.moveSpeed = normalMovementSpeed;
-        playerMovement.canRotate = true;
-
-        // 5. Clear reference
-        grabbedObject = null;
+            grabbedObject = null;
+            grabbedRb = null;
+        }
     }
-}
 
+    // **Visualize Corrected Raycast in Scene View**
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Vector3 rayOrigin = transform.position + Vector3.up * 1.2f; // **Chest-level ray**
+        Vector3 rayEnd = rayOrigin + transform.forward * 2.5f;
+
+        Gizmos.DrawLine(rayOrigin, rayEnd);
+        Gizmos.DrawWireSphere(rayEnd, 0.5f); // **Shows detection area**
+    }
 }

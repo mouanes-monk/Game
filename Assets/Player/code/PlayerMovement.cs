@@ -2,56 +2,56 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public float moveSpeed = 5f;   // Movement speed
-    public Rigidbody rb;           // Reference to Rigidbody
-    public Vector3 moveDirection;  // Store movement direction
-    public float rotationSpeed = 10f; // Speed of rotation
-  public float rayDistance = 2f; // Distance of the ray
-  public bool canRotate = true; // Add this variable
-     public Animator animator; // Make it public
-    private CharacterController controller;
+    public float moveSpeed = 5f;
+    public Rigidbody rb;
+    public Vector3 moveDirection;
+    public float rotationSpeed = 10f;
+    public bool canRotate = true;
+    public Animator animator;
 
     public LayerMask detectionLayer;
+
+    // 🎵 Footstep Sound
+    public AudioSource footstepSource;
+    public AudioClip footstepSound;
+    public float stepInterval = 0.4f;
+    private float stepTimer = 0f;
+
     void Start()
-    { animator = GetComponentInChildren<Animator>();
+    {
+        animator = GetComponentInChildren<Animator>();
         rb = GetComponent<Rigidbody>();
-        rb.freezeRotation = true; // Prevents unwanted rotation
+        rb.freezeRotation = true;
     }
 
     void Update()
     {
-         // Define the ray origin (player position)
-        Vector3 rayOrigin = transform.position;
-
-        // Define the ray direction (forward)
-        Vector3 rayDirection = transform.forward;
-
-        // Cast the ray
-        if (Physics.Raycast(rayOrigin, rayDirection, out RaycastHit hit, rayDistance, detectionLayer))
-        {
-            Debug.Log("Hit: " + hit.collider.name); // Show what we hit
-        }
-
-        // Draw the ray in the Scene view (for debugging)
-        Debug.DrawRay(rayOrigin, rayDirection * rayDistance, Color.red);
-        // Get Input (WASD / Arrow Keys)
-        float moveX = Input.GetAxisRaw("Horizontal"); // Left/Right
-        float moveZ = Input.GetAxisRaw("Vertical");   // Up/Down
+          if (GetComponent<PlayerRewind>().isRewinding) return;
+        float moveX = Input.GetAxisRaw("Horizontal");
+        float moveZ = Input.GetAxisRaw("Vertical");
 
         // Set movement direction
         moveDirection = new Vector3(moveX, 0f, moveZ).normalized;
-        
-        if (moveDirection.magnitude > 0.1f)
+
+        // 🎵 Footstep Sound Handling
+        if (moveDirection.magnitude > 0.1f) 
         {
-           
+            if (!footstepSource.isPlaying) 
+            {
+                footstepSource.clip = footstepSound;
+                footstepSource.loop = true; 
+                footstepSource.Play();
+            }
             animator.SetFloat("Speed", moveSpeed);
         }
-        else
+        else 
         {
+            footstepSource.Stop(); 
             animator.SetFloat("Speed", 0);
         }
-        // Rotate player to face movement direction
-        if (canRotate && moveDirection != Vector3.zero)  // Only rotate if moving
+
+        // 🎯 Improved Rotation (Rotate only when actually moving)
+        if (canRotate && moveDirection.magnitude > 0.1f)
         {
             Quaternion toRotation = Quaternion.LookRotation(moveDirection);
             transform.rotation = Quaternion.Slerp(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
@@ -60,7 +60,7 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        // Apply movement
+      
         rb.velocity = moveDirection * moveSpeed + new Vector3(0, rb.velocity.y, 0);
     }
 }
