@@ -11,11 +11,13 @@ public class PlayerMovement : MonoBehaviour
 
     public LayerMask detectionLayer;
 
-    // 🎵 Footstep Sound
     public AudioSource footstepSource;
     public AudioClip footstepSound;
+
     public float stepInterval = 0.4f;
     private float stepTimer = 0f;
+
+    public Transform cameraTransform; // 🎯 Assign this in Inspector!
 
     void Start()
     {
@@ -26,31 +28,38 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-          if (GetComponent<PlayerRewind>().isRewinding) return;
-        float moveX = Input.GetAxisRaw("Horizontal");
-        float moveZ = Input.GetAxisRaw("Vertical");
+        if (GetComponent<PlayerRewind>().isRewinding) return;
 
-        // Set movement direction
-        moveDirection = new Vector3(moveX, 0f, moveZ).normalized;
+        float moveX = Input.GetAxisRaw("Horizontal"); // A/Q/D
+        float moveZ = Input.GetAxisRaw("Vertical");   // W/Z/S
 
-        // 🎵 Footstep Sound Handling
-        if (moveDirection.magnitude > 0.1f) 
+        // 🌍 Camera-relative movement
+        Vector3 forward = cameraTransform.forward;
+        Vector3 right = cameraTransform.right;
+
+        forward.y = 0f; right.y = 0f;
+        forward.Normalize(); right.Normalize();
+
+        moveDirection = (forward * moveZ + right * moveX).normalized;
+
+        // 🎵 Footstep + Animator
+        if (moveDirection.magnitude > 0.1f)
         {
-            if (!footstepSource.isPlaying) 
+            if (!footstepSource.isPlaying)
             {
                 footstepSource.clip = footstepSound;
-                footstepSource.loop = true; 
+                footstepSource.loop = true;
                 footstepSource.Play();
             }
             animator.SetFloat("Speed", moveSpeed);
         }
-        else 
+        else
         {
-            footstepSource.Stop(); 
+            footstepSource.Stop();
             animator.SetFloat("Speed", 0);
         }
 
-        // 🎯 Improved Rotation (Rotate only when actually moving)
+        // 🔄 Smooth rotation toward movement
         if (canRotate && moveDirection.magnitude > 0.1f)
         {
             Quaternion toRotation = Quaternion.LookRotation(moveDirection);
@@ -60,7 +69,6 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-      
         rb.velocity = moveDirection * moveSpeed + new Vector3(0, rb.velocity.y, 0);
     }
 }
