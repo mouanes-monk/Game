@@ -4,7 +4,39 @@ public class PuzzleChecker : MonoBehaviour
 {
     public LetterSlot[] slots; // Slots where letters are placed
     public string[] correctAnswer = { "A", "B", "C" }; // Correct order
-     public GameObject sword;
+    public GameObject sword;
+    public GameObject stone;
+    bool isActivated;
+    
+    // Stone rotation settings
+    public float rotationSpeed = 2f;
+    public Vector3 targetRotation = new Vector3(0, 180, 0);
+    private Quaternion originalStoneRotation;
+    private Quaternion stoneTargetRotation;
+
+    private void Start()
+    {
+        // Store original stone rotation
+        if (stone != null)
+        {
+            originalStoneRotation = stone.transform.rotation;
+            stoneTargetRotation = originalStoneRotation;
+        }
+    }
+
+    private void Update()
+    {
+        if (stone != null)
+        {
+            // Rotate the stone smoothly
+            stone.transform.rotation = Quaternion.Lerp(
+                stone.transform.rotation,
+                stoneTargetRotation,
+                Time.deltaTime * rotationSpeed
+            );
+        }
+    }
+
     public void CheckSolution()
     {
         // Store placed letters
@@ -16,13 +48,13 @@ public class PuzzleChecker : MonoBehaviour
             if (slots[i].currentLetter == null)
             {
                 Debug.Log("Some slots are empty, waiting for more letters...");
-                return; // Stop checking if slots are empty
+                return;
             }
 
             placedLetters[i] = slots[i].currentLetter.letter.Trim().ToUpper();
         }
 
-        // Convert arrays to single string for easier debugging
+        // Convert arrays to single string for comparison
         string placedString = string.Join("", placedLetters);
         string correctString = string.Join("", correctAnswer).ToUpper();
 
@@ -30,8 +62,15 @@ public class PuzzleChecker : MonoBehaviour
 
         // Compare placed letters with correct answer
         if (placedString == correctString)
-        {    sword.SetActive(true); // Enables the sword when the puzzle is solved
-
+        {    
+            if (sword != null)
+                sword.SetActive(true);
+            
+            isActivated = true;
+            
+            if (stone != null)
+                stoneTargetRotation = Quaternion.Euler(targetRotation);
+            
             Debug.Log("✅ Puzzle Solved! Unlock the next part.");
         }
         else

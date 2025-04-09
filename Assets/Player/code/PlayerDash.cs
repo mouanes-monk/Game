@@ -3,44 +3,109 @@ using UnityEngine;
 
 public class PlayerDash : MonoBehaviour
 {
-    [SerializeField] private float dashSpeed = 1.0f;
-    [SerializeField] private float dashDistance = 3.0f;
+    [Header("Dash Settings")]
+    [SerializeField] private float dashSpeed = 25f;
+    [SerializeField] private float dashDistance = 3f;
+    [SerializeField] private float dashCooldown = 1.5f;
+    [SerializeField] private LayerMask collisionLayers;
+    [SerializeField] private float wallStopThreshold = 0.1f;
+    
+    [Header("References")]
     [SerializeField] private PlayerMovement player;
     [SerializeField] private Animator animator;
-    private bool Dashing;
+    [SerializeField] private BoxCollider playerCollider;
+    
+    private bool isDashing;
+    private bool isOnCooldown;
+    private Vector3 dashDirection;
+    private float currentCooldown;
 
     void Update()
-    {if (GetComponent<PlayerRewind>().isRewinding) return;
-        if (Input.GetKeyDown(KeyCode.Space) && !Dashing)
+    {
+        if (GetComponent<PlayerRewind>()?.isRewinding == true) return;
+        
+        // Handle cooldown
+        if (isOnCooldown)
         {
-            animator.SetBool("isDashing", true);
+            currentCooldown -= Time.deltaTime;
+            if (currentCooldown <= 0)
+            {
+                isOnCooldown = false;
+            }
+        }
+        
+        if (Input.GetKeyDown(KeyCode.Space) && !isDashing && !isOnCooldown)
+        {
+            dashDirection = (player.moveDirection.magnitude > 0.1f) 
+                ? player.moveDirection.normalized 
+                : transform.forward;
+            
             StartCoroutine(Dash());
         }
     }
 
     IEnumerator Dash()
     {
-        Dashing = true;
+        isDashing = true;
+        animator.SetBool("isDashing", true);
+        
+        float remainingDistance = dashDistance;
         Vector3 startPosition = transform.position;
-        
-        // Determine dash direction - use movement if available, otherwise use facing direction
-        Vector3 dashDirection = (player.moveDirection.magnitude > 0.1f) 
-            ? player.moveDirection.normalized 
-            : transform.forward;
-        
-        Vector3 endPosition = startPosition + dashDirection * dashDistance;
 
-        float dashTime = 0f;
-
-        while (dashTime < 1f)
+        while (remainingDistance > 0 && isDashing)
         {
-            transform.position = Vector3.Lerp(startPosition, endPosition, dashTime);
-            dashTime += Time.deltaTime * dashSpeed;
+            float moveDistance = Mathf.Min(dashSpeed * Time.deltaTime, remainingDistance);
+            Vector3 proposedPosition = transform.position + dashDirection * moveDistance;
+            
+            if (Physics.CheckBox(
+                proposedPosition + playerCollider.center, 
+                playerCollider.size * 0.5f * (1 - wallStopThreshold),
+                transform.rotation, 
+                collisionLayers))
+            {
+                if (Physics.BoxCast(
+                    transform.position + playerCollider.center, 
+                    playerCollider.size * 0.5f, 
+                    dashDirection, 
+                    out RaycastHit hit, 
+                    transform.rotation, 
+                    moveDistance * 2f,
+                    collisionLayers))
+                {
+                    transform.position = hit.point - dashDirection * 
+                        (playerCollider.size.magnitude * 0.5f + wallStopThreshold);
+                }
+                break;
+            }
+
+            transform.position = proposedPosition;
+            remainingDistance -= moveDistance;
             yield return null;
         }
 
-        transform.position = endPosition;
-        Dashing = false;
+        isDashing = false;
         animator.SetBool("isDashing", false);
+        
+        // Start cooldown
+        isOnCooldown = true;
+        currentCooldown = dashCooldown;
+    }
+
+    public bool CanDash()
+    {
+        return !isDashing && !isOnCooldown;
+    }
+
+    void OnDrawGizmos()
+    {
+        if (playerCollider != null && isDashing)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.matrix = Matrix4x4.TRS(
+                transform.position + playerCollider.center, 
+                transform.rotation, 
+                Vector3.one);
+            Gizmos.DrawWireCube(Vector3.zero, playerCollider.size * (1 - wallStopThreshold));
+        }
     }
 }

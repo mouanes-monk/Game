@@ -9,11 +9,12 @@ TagManager:
   - sword
   - BigRock
   - fragment
+  - BuggyBox
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - player
   - Water
   - UI
   - Post

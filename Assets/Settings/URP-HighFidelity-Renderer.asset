@@ -53,8 +53,7 @@ MonoBehaviour:
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
   - {fileID: -1878332245247344467}
-  - {fileID: 2476091791046186912}
-  m_RendererFeatureMap: adc0de57c6d2eee5a09791745dd85c22
+  m_RendererFeatureMap: adc0de57c6d2eee5
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -112,10 +111,13 @@ MonoBehaviour:
   m_Active: 1
   renderPassEvent: 350
   outlinesLayerMask:
-    serializedVersion: 2
     m_Bits: 256
   outlineSettings:
-    outlineColor: {r: 0, g: 1, b: 0.7750001, a: 1}
+    outlineColor:
+      r: 0
+      g: 1
+      b: 0.7750001
+      a: 1
     outlineScale: 0.77
     depthThreshold: 1.5
     robertsCrossMultiplier: 100
@@ -125,7 +127,11 @@ MonoBehaviour:
     colorFormat: 0
     depthBufferBits: 0
     filterMode: 0
-    backgroundColor: {r: 0, g: 0, b: 0, a: 0}
+    backgroundColor:
+      r: 0
+      g: 0
+      b: 0
+      a: 0
     perObjectData: 0
     enableDynamicBatching: 0
     enableInstancing: 0

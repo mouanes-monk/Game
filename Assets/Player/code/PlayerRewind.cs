@@ -85,7 +85,7 @@ public class PlayerRewind : MonoBehaviour
         OnRewindStart?.Invoke();
 
         bool wasMovingAtStart = movementHistory[movementHistory.Count - 1].wasMoving;
-        animator.SetBool("isRunning", wasMovingAtStart);
+        animator.SetFloat("Speed", 1);
         animator.SetBool("isDashing", false);
         animator.SetFloat("Speed", wasMovingAtStart ? 1f : 0f);
 
@@ -107,7 +107,7 @@ public class PlayerRewind : MonoBehaviour
                 transform.position = Vector3.Lerp(startPos, targetFrame.position, t);
                 transform.rotation = Quaternion.Slerp(startRot, targetFrame.rotation, t);
 
-                animator.SetBool("isRunning", targetFrame.wasMoving);
+                animator.SetFloat("Speed", 1);
                 animator.Play(targetFrame.animationStateHash, 0, Mathf.Lerp(1, 0, t));
 
                 yield return null;
@@ -119,7 +119,7 @@ public class PlayerRewind : MonoBehaviour
         isRewinding = false;
         movementHistory.Clear();
 
-        animator.SetBool("isRunning", false);
+        
         animator.SetBool("isDashing", false);
         animator.SetFloat("Speed", 0f);
 

@@ -13,12 +13,13 @@ public class CannonInteraction : MonoBehaviour
     public GameObject targetObject1;
 
     [Header("UI Settings")]
-    public Text interactionPrompt; // Assign a UI Text element in Inspector
+    public Text interactionPrompt;
     public string promptText = "Press E to launch";
     public string missingFragmentText = "Need fragment!";
 
     private GameObject player;
     private bool isPlayerInRange = false;
+    public MovementSlowZone timeZone;
 
     void Start()
     {
@@ -28,9 +29,23 @@ public class CannonInteraction : MonoBehaviour
 
     void Update()
     {
-        if (isPlayerInRange && Input.GetKeyDown(KeyCode.E) && player != null)
+        if (isPlayerInRange && player != null)
         {
-            TryLaunchCannon();
+            PlayerInventory inventory = player.GetComponent<PlayerInventory>();
+            
+            // Only show prompt if player has fragment
+            if (inventory != null && inventory.hasFragment)
+            {
+                if (Input.GetKeyDown(KeyCode.E))
+                {
+                    LaunchCannon();
+                    if (timeZone != null)
+                    {
+                        timeZone.ResetPlayerSpeed();
+                        Destroy(timeZone.gameObject);
+                    }
+                }
+            }
         }
     }
 
@@ -52,42 +67,24 @@ public class CannonInteraction : MonoBehaviour
         }
     }
 
-    void TryLaunchCannon()
-    {
-        PlayerInventory inventory = player.GetComponent<PlayerInventory>();
-        
-        if (inventory != null && inventory.hasFragment)
-        {
-            LaunchBall();
-            if (targetObject != null) targetObject.SetActive(false);
-             if (targetObject1 != null) targetObject1.SetActive(false);
-
-            if (interactionPrompt != null) interactionPrompt.gameObject.SetActive(false);
-        }
-        else
-        {
-            Debug.Log("❌ You need the fragment to launch!");
-            if (interactionPrompt != null)
-            {
-                interactionPrompt.text = missingFragmentText;
-                StartCoroutine(ResetPromptText(2f));
-            }
-        }
-    }
-
-    IEnumerator ResetPromptText(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        if (interactionPrompt != null) interactionPrompt.text = promptText;
-    }
-
     void UpdatePromptVisibility()
     {
         if (interactionPrompt != null)
         {
-            interactionPrompt.gameObject.SetActive(true);
-            interactionPrompt.text = promptText;
+            PlayerInventory inventory = player.GetComponent<PlayerInventory>();
+            
+            // Only show prompt if player has fragment
+            interactionPrompt.gameObject.SetActive(inventory != null && inventory.hasFragment);
+            interactionPrompt.text = inventory != null && inventory.hasFragment ? promptText : missingFragmentText;
         }
+    }
+
+    void LaunchCannon()
+    {
+        LaunchBall();
+        if (targetObject != null) targetObject.SetActive(false);
+        if (targetObject1 != null) targetObject1.SetActive(false);
+        if (interactionPrompt != null) interactionPrompt.gameObject.SetActive(false);
     }
 
     void LaunchBall()

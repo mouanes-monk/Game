@@ -2,63 +2,75 @@ using UnityEngine;
 
 public class PlayerGrab : MonoBehaviour
 {
-    public Transform holdPosition; // Where the object is held
-    public float slowMovementSpeed = 2f;
-    private float normalMovementSpeed;
-    private bool isHolding = false;
+    [Header("Hold Positions")]
+    public Transform holdPosition;          
+    public Transform buggyHoldPosition;    
 
-    private GameObject grabbedObject;
-    private Rigidbody grabbedRb;
-    private PlayerMovement playerMovement;
-    public Animator animator;
-    public  float grabRange = 2.5f;
+    [Header("Settings")]
+    public float slowMovementSpeed = 2f;    
+    public float grabRange = 2.5f;          
+    public float followSpeed = 15f;         // Increased for better response
+    public float holdDistance = 0.5f;       // Added hold distance parameter
+
+    private GameObject grabbedObject;      
+    private Rigidbody grabbedRb;           
+    private PlayerMovement playerMovement; 
+    private float normalMovementSpeed;     
+    private bool isHolding = false;        
+    private bool isBuggyBox = false;
+
+    [Header("Animation")]
+    public Animator animator;              
 
     void Start()
-    {  
+    {
         animator = GetComponentInChildren<Animator>();
         playerMovement = GetComponent<PlayerMovement>();
         normalMovementSpeed = playerMovement.moveSpeed;
+
+        if (buggyHoldPosition == null)
+        {
+            buggyHoldPosition = holdPosition;
+        }
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E)) // Press E to grab/drop
+        if (Input.GetKeyDown(KeyCode.E))
         {
             if (!isHolding)
                 TryGrab();
             else
                 DropObject();
         }
+
+        if (isHolding && grabbedObject != null)
+        {
+            MoveHeldObject();
+        }
     }
 
     void TryGrab()
     {
         RaycastHit hit;
-        // **Increased range**
-        float sphereRadius = 0.5f; // **Wider detection**
-
-        // **Fix Raycast Position: Start at chest height, not feet**
-        Vector3 rayOrigin = transform.position + Vector3.up * 1.2f; // Chest-level cast
+        Vector3 rayOrigin = transform.position + Vector3.up * 1.2f;
         Vector3 rayDirection = transform.forward;
 
-        // **Use SphereCast for better object detection**
-        if (Physics.SphereCast(rayOrigin, sphereRadius, rayDirection, out hit, grabRange))
+        if (Physics.SphereCast(rayOrigin, 0.5f, rayDirection, out hit, grabRange))
         {
-            if (hit.collider.CompareTag("box")) 
+            if (hit.collider.CompareTag("box"))
             {
                 grabbedObject = hit.collider.gameObject;
                 grabbedRb = grabbedObject.GetComponent<Rigidbody>();
 
                 if (grabbedRb)
-                {   
+                {
                     animator.SetBool("Grab", true);
-                    grabbedRb.isKinematic = true;
+                    grabbedRb.useGravity = false;
+                    grabbedRb.drag = 10f;              // Added drag for stability
+                    grabbedRb.angularDrag = 10f;       // Added angular drag
 
-                    // **Align object with hands**
-                    grabbedObject.transform.SetParent(holdPosition, true);
-                    grabbedObject.transform.position = holdPosition.position;
-                    grabbedObject.transform.rotation = holdPosition.rotation;
-
+                    isBuggyBox = grabbedObject.name.ToLower().Contains("buggy");
                     isHolding = true;
                     playerMovement.moveSpeed = slowMovementSpeed;
                     playerMovement.canRotate = false;
@@ -67,35 +79,59 @@ public class PlayerGrab : MonoBehaviour
         }
     }
 
+    void MoveHeldObject()
+    {
+        if (grabbedRb == null) return;
+
+        Transform targetHold = isBuggyBox ? buggyHoldPosition : holdPosition;
+        Vector3 targetPosition = targetHold.position;
+        Vector3 direction = targetPosition - grabbedRb.position;
+
+        // Calculate desired velocity
+        Vector3 targetVelocity = direction * followSpeed;
+        
+        // Calculate force needed
+        Vector3 force = (targetVelocity - grabbedRb.velocity) * grabbedRb.mass;
+        
+        // Apply force while maintaining physics
+        grabbedRb.AddForce(force);
+        
+        // Maintain distance
+        if (direction.magnitude > holdDistance)
+        {
+            grabbedRb.velocity = direction.normalized * followSpeed;
+        }
+        else
+        {
+            grabbedRb.velocity = Vector3.zero;
+        }
+    }
+
     void DropObject()
     {
         if (grabbedObject)
         {
-            grabbedObject.transform.SetParent(null, true);
-
-            grabbedRb.isKinematic = false; 
-            grabbedRb.WakeUp(); 
-            
-            Physics.SyncTransforms(); 
-
             animator.SetBool("Grab", false);
+            grabbedRb.useGravity = true;
+            grabbedRb.drag = 0f;           // Reset drag
+            grabbedRb.angularDrag = 0.05f; // Reset angular drag
+
             isHolding = false;
             playerMovement.moveSpeed = normalMovementSpeed;
             playerMovement.canRotate = true;
 
             grabbedObject = null;
             grabbedRb = null;
+            isBuggyBox = false;
         }
     }
 
-    // **Visualize Corrected Raycast in Scene View**
     void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
-        Vector3 rayOrigin = transform.position + Vector3.up * 1.2f; // **Chest-level ray**
-        Vector3 rayEnd = rayOrigin + transform.forward * 2.5f;
-
+        Vector3 rayOrigin = transform.position + Vector3.up * 1.2f;
+        Vector3 rayEnd = rayOrigin + transform.forward * grabRange;
         Gizmos.DrawLine(rayOrigin, rayEnd);
-        Gizmos.DrawWireSphere(rayEnd, 0.5f); // **Shows detection area**
+        Gizmos.DrawWireSphere(rayEnd, 0.5f);
     }
 }

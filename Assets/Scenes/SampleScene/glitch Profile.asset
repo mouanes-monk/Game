@@ -15,13 +15,13 @@ MonoBehaviour:
   active: 1
   shadows:
     m_OverrideState: 1
-    m_Value: {x: 1, y: 0.81612337, z: 0.9561453, w: 0.029498365}
+    m_Value: {x: 1, y: 0.81612337, z: 0.9561453, w: 0.0969234}
   midtones:
     m_OverrideState: 1
-    m_Value: {x: 1, y: 0.92787784, z: 0.69834816, w: 0.10535238}
+    m_Value: {x: 1, y: 0.92787784, z: 0.69834816, w: 0.20649017}
   highlights:
     m_OverrideState: 1
-    m_Value: {x: 0.5819088, y: 1, z: 0.6184106, w: 0.11747454}
+    m_Value: {x: 0.5819088, y: 1, z: 0.6184106, w: 1}
   shadowsStart:
     m_OverrideState: 0
     m_Value: 0
@@ -49,7 +49,7 @@ MonoBehaviour:
   active: 1
   intensity:
     m_OverrideState: 1
-    m_Value: 0
+    m_Value: 0.056
 --- !u!114 &-2785238722348478113
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -93,19 +93,19 @@ MonoBehaviour:
   active: 1
   color:
     m_OverrideState: 1
-    m_Value: {r: 0.28930807, g: 0.18260159, b: 0.06095479, a: 1}
+    m_Value: {r: 0.29559743, g: 0.17832966, b: 0.043688904, a: 1}
   center:
-    m_OverrideState: 0
-    m_Value: {x: 0.5, y: 0.5}
+    m_OverrideState: 1
+    m_Value: {x: 0.46, y: 0.5}
   intensity:
     m_OverrideState: 1
-    m_Value: 0.243
+    m_Value: 0.734
   smoothness:
     m_OverrideState: 1
-    m_Value: 0.548
+    m_Value: 1
   rounded:
     m_OverrideState: 1
-    m_Value: 0
+    m_Value: 1
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -140,20 +140,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   active: 1
   postExposure:
-    m_OverrideState: 0
-    m_Value: 0
+    m_OverrideState: 1
+    m_Value: -0.08
   contrast:
     m_OverrideState: 1
-    m_Value: 2.6
+    m_Value: -9
   colorFilter:
     m_OverrideState: 1
-    m_Value: {r: 1, g: 0.9606442, b: 0.81446534, a: 1}
+    m_Value: {r: 0.9622642, g: 0.8985253, b: 0.6626913, a: 1}
   hueShift:
     m_OverrideState: 1
     m_Value: -2
   saturation:
     m_OverrideState: 1
-    m_Value: -28.89
+    m_Value: -34.42
 --- !u!114 &4639123123278932172
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -166,15 +166,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29fa0085f50d5e54f8144f766051a691, type: 3}
   m_Name: FilmGrain
   m_EditorClassIdentifier: 
-  active: 1
+  active: 0
   type:
     m_OverrideState: 0
     m_Value: 0
   intensity:
     m_OverrideState: 1
-    m_Value: 0.359
+    m_Value: 0.319
   response:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: 0.785
   texture:
     m_OverrideState: 0

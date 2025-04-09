@@ -16,11 +16,11 @@ public class PlayerMovement : MonoBehaviour
 
     public float stepInterval = 0.4f;
     private float stepTimer = 0f;
-
+public float baseMoveSpeed;
     public Transform cameraTransform; // 🎯 Assign this in Inspector!
 
     void Start()
-    {
+    {baseMoveSpeed =moveSpeed;
         animator = GetComponentInChildren<Animator>();
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
