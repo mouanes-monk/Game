@@ -29332,12 +29332,12 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 52.949284, y: 8.519065, z: 29.78344}
-  m_Center: {x: 8.052706, y: -3.7595325, z: 6.58498}
+  m_Size: {x: 52.949284, y: 19.738678, z: 40.44155}
+  m_Center: {x: 8.052706, y: -9.369339, z: 1.2559242}
 --- !u!1 &913979740 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: ce854c907a7bb3945b6334f650625c79,
