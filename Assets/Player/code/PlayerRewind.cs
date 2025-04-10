@@ -56,7 +56,7 @@ public class PlayerRewind : MonoBehaviour
                 position = transform.position,
                 rotation = transform.rotation,
                 animationStateHash = animator.GetCurrentAnimatorStateInfo(0).shortNameHash,
-                wasMoving = playerMovement.moveDirection.magnitude > 0.1f
+                wasMoving = playerMovement.MoveDirection.magnitude > 0.1f
             });
         }
     }

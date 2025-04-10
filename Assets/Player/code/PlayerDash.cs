@@ -51,6 +51,16 @@ public class PlayerDash : MonoBehaviour
         
         float remainingDistance = dashDistance;
         Vector3 startPosition = transform.position;
+<<<<<<< Updated upstream
+=======
+        
+        // Determine dash direction - use movement if available, otherwise use facing direction
+        Vector3 dashDirection = (player.MoveDirection.magnitude > 0.1f) 
+            ? player.MoveDirection.normalized 
+            : transform.forward;
+        
+        Vector3 endPosition = startPosition + dashDirection * dashDistance;
+>>>>>>> Stashed changes
 
         while (remainingDistance > 0 && isDashing)
         {

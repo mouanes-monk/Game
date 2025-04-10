@@ -9,7 +9,11 @@ TagManager:
   - sword
   - BigRock
   - fragment
+<<<<<<< Updated upstream
   - BuggyBox
+=======
+  - Enemy
+>>>>>>> Stashed changes
   layers:
   - Default
   - TransparentFX

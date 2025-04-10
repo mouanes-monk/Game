@@ -1,23 +1,103 @@
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public float moveSpeed = 5f;
-    public Rigidbody rb;
-    public Vector3 moveDirection;
-    public float rotationSpeed = 10f;
-    public bool canRotate = true;
-    public Animator animator;
+    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private Rigidbody rb;
+    [SerializeField] private Vector3 moveDirection;
+    [SerializeField] private float rotationSpeed = 10f;
+    [SerializeField] private bool canRotate = true;
+    [SerializeField] private Animator animator;
+    [SerializeField] private TimeStop timeStop;
 
-    public LayerMask detectionLayer;
+    [SerializeField] private LayerMask detectionLayer;
 
-    public AudioSource footstepSource;
-    public AudioClip footstepSound;
+    [SerializeField] private AudioSource footstepSource;
+    [SerializeField] private AudioClip footstepSound;
 
-    public float stepInterval = 0.4f;
+    [SerializeField] private float stepInterval = 0.4f;
     private float stepTimer = 0f;
+<<<<<<< Updated upstream
 public float baseMoveSpeed;
     public Transform cameraTransform; // 🎯 Assign this in Inspector!
+=======
+
+    [SerializeField] private Transform cameraTransform; // 🎯 Assign this in Inspector!
+
+    public float MoveSpeed
+    {
+        get => moveSpeed;
+        set => moveSpeed = value;
+    }
+
+    public Rigidbody Rb
+    {
+        get => rb;
+        set => rb = value;
+    }
+
+    public Vector3 MoveDirection
+    {
+        get => moveDirection;
+        set => moveDirection = value;
+    }
+
+    public float RotationSpeed
+    {
+        get => rotationSpeed;
+        set => rotationSpeed = value;
+    }
+
+    public bool CanRotate
+    {
+        get => canRotate;
+        set => canRotate = value;
+    }
+
+    public Animator Animator
+    {
+        get => animator;
+        set => animator = value;
+    }
+
+    public LayerMask DetectionLayer
+    {
+        get => detectionLayer;
+        set => detectionLayer = value;
+    }
+
+    public AudioSource FootstepSource
+    {
+        get => footstepSource;
+        set => footstepSource = value;
+    }
+
+    public AudioClip FootstepSound
+    {
+        get => footstepSound;
+        set => footstepSound = value;
+    }
+
+    public float StepInterval
+    {
+        get => stepInterval;
+        set => stepInterval = value;
+    }
+
+    public float StepTimer
+    {
+        get => stepTimer;
+        set => stepTimer = value;
+    }
+
+    public Transform CameraTransform
+    {
+        get => cameraTransform;
+        set => cameraTransform = value;
+    }
+
+>>>>>>> Stashed changes
 
     void Start()
     {baseMoveSpeed =moveSpeed;
@@ -42,6 +122,11 @@ public float baseMoveSpeed;
 
         moveDirection = (forward * moveZ + right * moveX).normalized;
 
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            timeStop.FreezeEnemies(4.5f);
+        }
+
         // 🎵 Footstep + Animator
         if (moveDirection.magnitude > 0.1f)
         {
@@ -51,7 +136,7 @@ public float baseMoveSpeed;
                 footstepSource.loop = true;
                 footstepSource.Play();
             }
-            animator.SetFloat("Speed", moveSpeed);
+            animator.SetFloat("Speed", MoveSpeed);
         }
         else
         {
@@ -60,7 +145,7 @@ public float baseMoveSpeed;
         }
 
         // 🔄 Smooth rotation toward movement
-        if (canRotate && moveDirection.magnitude > 0.1f)
+        if (CanRotate && moveDirection.magnitude > 0.1f)
         {
             Quaternion toRotation = Quaternion.LookRotation(moveDirection);
             transform.rotation = Quaternion.Slerp(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
@@ -69,6 +154,6 @@ public float baseMoveSpeed;
 
     void FixedUpdate()
     {
-        rb.velocity = moveDirection * moveSpeed + new Vector3(0, rb.velocity.y, 0);
+        rb.velocity = moveDirection * MoveSpeed + new Vector3(0, rb.velocity.y, 0);
     }
 }

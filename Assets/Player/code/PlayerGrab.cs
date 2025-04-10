@@ -6,6 +6,7 @@ public class PlayerGrab : MonoBehaviour
     public Transform holdPosition;          
     public Transform buggyHoldPosition;    
 
+<<<<<<< Updated upstream
     [Header("Settings")]
     public float slowMovementSpeed = 2f;    
     public float grabRange = 2.5f;          
@@ -21,10 +22,18 @@ public class PlayerGrab : MonoBehaviour
 
     [Header("Animation")]
     public Animator animator;              
+=======
+    private GameObject grabbedObject;
+    private Rigidbody grabbedRb;
+    private PlayerMovement player;
+    public Animator animator;
+    public  float grabRange = 2.5f;
+>>>>>>> Stashed changes
 
     void Start()
     {
         animator = GetComponentInChildren<Animator>();
+<<<<<<< Updated upstream
         playerMovement = GetComponent<PlayerMovement>();
         normalMovementSpeed = playerMovement.moveSpeed;
 
@@ -32,6 +41,10 @@ public class PlayerGrab : MonoBehaviour
         {
             buggyHoldPosition = holdPosition;
         }
+=======
+        player = GetComponent<PlayerMovement>();
+        normalMovementSpeed = player.MoveSpeed;
+>>>>>>> Stashed changes
     }
 
     void Update()
@@ -72,8 +85,8 @@ public class PlayerGrab : MonoBehaviour
 
                     isBuggyBox = grabbedObject.name.ToLower().Contains("buggy");
                     isHolding = true;
-                    playerMovement.moveSpeed = slowMovementSpeed;
-                    playerMovement.canRotate = false;
+                    player.MoveSpeed = slowMovementSpeed;
+                    player.CanRotate = false;
                 }
             }
         }
@@ -117,8 +130,8 @@ public class PlayerGrab : MonoBehaviour
             grabbedRb.angularDrag = 0.05f; // Reset angular drag
 
             isHolding = false;
-            playerMovement.moveSpeed = normalMovementSpeed;
-            playerMovement.canRotate = true;
+            player.MoveSpeed = normalMovementSpeed;
+            player.CanRotate = true;
 
             grabbedObject = null;
             grabbedRb = null;
