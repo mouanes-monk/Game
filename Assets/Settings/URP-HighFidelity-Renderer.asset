@@ -96,6 +96,7 @@ MonoBehaviour:
   m_CopyDepthMode: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
+<<<<<<< Updated upstream
 --- !u!114 &2476091791046186912
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -135,3 +136,5 @@ MonoBehaviour:
     perObjectData: 0
     enableDynamicBatching: 0
     enableInstancing: 0
+=======
+>>>>>>> Stashed changes

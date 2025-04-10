@@ -9,12 +9,12 @@ public class PlayerDash : MonoBehaviour
     [SerializeField] private float dashCooldown = 1.5f;
     [SerializeField] private LayerMask collisionLayers;
     [SerializeField] private float wallStopThreshold = 0.1f;
-    
+
     [Header("References")]
     [SerializeField] private PlayerMovement player;
     [SerializeField] private Animator animator;
     [SerializeField] private BoxCollider playerCollider;
-    
+
     private bool isDashing;
     private bool isOnCooldown;
     private Vector3 dashDirection;
@@ -23,71 +23,61 @@ public class PlayerDash : MonoBehaviour
     void Update()
     {
         if (GetComponent<PlayerRewind>()?.isRewinding == true) return;
-        
-        // Handle cooldown
+
         if (isOnCooldown)
         {
             currentCooldown -= Time.deltaTime;
-            if (currentCooldown <= 0)
-            {
-                isOnCooldown = false;
-            }
+            if (currentCooldown <= 0) isOnCooldown = false;
         }
-        
+
         if (Input.GetKeyDown(KeyCode.Space) && !isDashing && !isOnCooldown)
         {
-            dashDirection = (player.moveDirection.magnitude > 0.1f) 
-                ? player.moveDirection.normalized 
+            dashDirection = (player.MoveDirection.magnitude > 0.1f)
+                ? player.MoveDirection.normalized
                 : transform.forward;
-            
+
             StartCoroutine(Dash());
         }
     }
 
-  IEnumerator Dash()
-{
-    isDashing = true;
-    animator.SetBool("isDashing", true);
-
-    float remainingDistance = dashDistance;
-
-    while (remainingDistance > 0f)
+    IEnumerator Dash()
     {
-        float moveDistance = Mathf.Min(dashSpeed * Time.deltaTime, remainingDistance);
+        isDashing = true;
+        animator.SetBool("isDashing", true);
 
-        // Perform a box cast to check if there is a collider in the dash direction
-        if (Physics.BoxCast(
-            transform.position + playerCollider.center,
-            playerCollider.size * 0.5f,
-            dashDirection,
-            out RaycastHit hit,
-            transform.rotation,
-            moveDistance,
-            collisionLayers))
+        float remainingDistance = dashDistance;
+
+        while (remainingDistance > 0f)
         {
-            // Stop right before the collider
-            float safeDistance = hit.distance - wallStopThreshold;
-            if (safeDistance > 0f)
+            float moveDistance = Mathf.Min(dashSpeed * Time.deltaTime, remainingDistance);
+
+            if (Physics.BoxCast(
+                transform.position + playerCollider.center,
+                playerCollider.size * 0.5f,
+                dashDirection,
+                out RaycastHit hit,
+                transform.rotation,
+                moveDistance,
+                collisionLayers))
             {
-                transform.position += dashDirection * safeDistance;
+                float safeDistance = hit.distance - wallStopThreshold;
+                if (safeDistance > 0f)
+                {
+                    transform.position += dashDirection * safeDistance;
+                }
+                break;
             }
-            break;
+
+            transform.position += dashDirection * moveDistance;
+            remainingDistance -= moveDistance;
+            yield return null;
         }
 
-        // Move character if no obstacle detected
-        transform.position += dashDirection * moveDistance;
-        remainingDistance -= moveDistance;
-        yield return null;
+        isDashing = false;
+        animator.SetBool("isDashing", false);
+        isOnCooldown = true;
+        currentCooldown = dashCooldown;
     }
-
-    isDashing = false;
-    animator.SetBool("isDashing", false);
-
-    // Cooldown starts
-    isOnCooldown = true;
-    currentCooldown = dashCooldown;
-}
-
 
     public bool CanDash()
     {
@@ -100,8 +90,8 @@ public class PlayerDash : MonoBehaviour
         {
             Gizmos.color = Color.red;
             Gizmos.matrix = Matrix4x4.TRS(
-                transform.position + playerCollider.center, 
-                transform.rotation, 
+                transform.position + playerCollider.center,
+                transform.rotation,
                 Vector3.one);
             Gizmos.DrawWireCube(Vector3.zero, playerCollider.size * (1 - wallStopThreshold));
         }

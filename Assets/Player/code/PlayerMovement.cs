@@ -2,84 +2,74 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public float moveSpeed = 5f;
-    public Rigidbody rb;
-    public Vector3 moveDirection;
-    public float rotationSpeed = 10f;
-    public bool canRotate = true;
-    public Animator animator;
-
-    public LayerMask detectionLayer;
-
-    public AudioSource footstepSource;
-    public AudioClip footstepSound;
-
-    public float stepInterval = 0.4f;
-    private float stepTimer = 0f;
+    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private Rigidbody rb;
+    [SerializeField] private float rotationSpeed = 10f;
+    [SerializeField] private Animator animator;
+    [SerializeField] private TimeStop timeStop;
+    [SerializeField] private Transform cameraTransform;
 
     public float baseMoveSpeed;
-    public Transform cameraTransform; // 🎯 Assign this in Inspector!
+    public Vector3 MoveDirection { get; private set; }
+    public bool CanRotate { get; set; } = true;
+    public float MoveSpeed
+    {
+        get => moveSpeed;
+        set => moveSpeed = value;
+    }
 
     void Start()
     {
         baseMoveSpeed = moveSpeed;
         animator = GetComponentInChildren<Animator>();
         rb = GetComponent<Rigidbody>();
-
-        // ✅ Prevents unwanted rotation but allows physics-based movement
         rb.freezeRotation = true;
-
-        // ✅ Just in case — ensure gravity is enabled
         rb.useGravity = true;
     }
 
     void Update()
     {
-        // Skip movement when rewinding
-        if (GetComponent<PlayerRewind>().isRewinding) return;
+        if (GetComponent<PlayerRewind>()?.isRewinding == true) return;
 
-        float moveX = Input.GetAxisRaw("Horizontal"); // A/Q/D
-        float moveZ = Input.GetAxisRaw("Vertical");   // W/Z/S
+        float moveX = Input.GetAxisRaw("Horizontal");
+        float moveZ = Input.GetAxisRaw("Vertical");
 
-        // 🌍 Camera-relative movement
         Vector3 forward = cameraTransform.forward;
         Vector3 right = cameraTransform.right;
 
-        forward.y = 0f; right.y = 0f;
-        forward.Normalize(); right.Normalize();
+        forward.y = 0f;
+        right.y = 0f;
 
-        moveDirection = (forward * moveZ + right * moveX).normalized;
+        forward.Normalize();
+        right.Normalize();
 
-        // 🎵 Footstep + Animator
-        if (moveDirection.magnitude > 0.1f)
+        MoveDirection = (forward * moveZ + right * moveX).normalized;
+
+        if (MoveDirection.magnitude > 0.1f)
         {
-            if (!footstepSource.isPlaying)
-            {
-                footstepSource.clip = footstepSound;
-                footstepSource.loop = true;
-                footstepSource.Play();
-            }
-            animator.SetFloat("Speed", moveSpeed);
+            animator.SetFloat("Speed", MoveSpeed);
         }
         else
         {
-            footstepSource.Stop();
             animator.SetFloat("Speed", 0);
         }
 
-        // 🔄 Smooth rotation toward movement direction
-        if (canRotate && moveDirection.magnitude > 0.1f)
+        if (CanRotate && MoveDirection.magnitude > 0.1f)
         {
-            Quaternion toRotation = Quaternion.LookRotation(moveDirection);
+            Quaternion toRotation = Quaternion.LookRotation(MoveDirection);
             transform.rotation = Quaternion.Slerp(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
+        }
+
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            timeStop.FreezeEnemies(4.5f);
         }
     }
 
     void FixedUpdate()
     {
-        // ✅ Preserve vertical (Y) velocity to allow gravity to work properly
         Vector3 currentVelocity = rb.velocity;
-        Vector3 horizontalVelocity = moveDirection * moveSpeed;
+        Vector3 horizontalVelocity = MoveDirection * moveSpeed;
         rb.velocity = new Vector3(horizontalVelocity.x, currentVelocity.y, horizontalVelocity.z);
     }
 }

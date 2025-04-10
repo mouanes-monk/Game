@@ -3,28 +3,30 @@ using UnityEngine;
 public class PlayerGrab : MonoBehaviour
 {
     [Header("Hold Positions")]
-    public Transform holdPosition;          
-    public Transform buggyHoldPosition;    
+    public Transform holdPosition;
+    public Transform buggyHoldPosition;
 
     [Header("Settings")]
-    public float slowMovementSpeed = 2f;    
-    public float grabRange = 2.5f;          
+    public float slowMovementSpeed = 2f;
+    public float grabRange = 2.5f;
     public float followSpeed = 15f;
     public float holdDistance = 0.5f;
-
-    private GameObject grabbedObject;
-    private Rigidbody grabbedRb;
-    private PlayerMovement playerMovement;
-    private bool isHolding = false;
-    private bool isBuggyBox = false;
 
     [Header("Animation")]
     public Animator animator;
 
+    private GameObject grabbedObject;
+    private Rigidbody grabbedRb;
+    private PlayerMovement player;
+    private bool isHolding = false;
+    private bool isBuggyBox = false;
+    private float normalMovementSpeed;
+
     void Start()
     {
         animator = GetComponentInChildren<Animator>();
-        playerMovement = GetComponent<PlayerMovement>();
+        player = GetComponent<PlayerMovement>();
+        normalMovementSpeed = player.MoveSpeed;
 
         if (buggyHoldPosition == null)
         {
@@ -36,10 +38,8 @@ public class PlayerGrab : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.E))
         {
-            if (!isHolding)
-                TryGrab();
-            else
-                DropObject();
+            if (!isHolding) TryGrab();
+            else DropObject();
         }
 
         if (isHolding && grabbedObject != null)
@@ -70,8 +70,8 @@ public class PlayerGrab : MonoBehaviour
 
                     isBuggyBox = grabbedObject.name.ToLower().Contains("buggy");
                     isHolding = true;
-                    playerMovement.moveSpeed = slowMovementSpeed;
-                    playerMovement.canRotate = false;
+                    player.MoveSpeed = slowMovementSpeed;
+                    player.CanRotate = false;
                 }
             }
         }
@@ -110,27 +110,8 @@ public class PlayerGrab : MonoBehaviour
             grabbedRb.angularDrag = 0.05f;
 
             isHolding = false;
-            playerMovement.canRotate = true;
-
-            MovementSlowZone zone = FindObjectOfType<MovementSlowZone>();
-            if (zone != null && playerMovement != null)
-            {
-                Collider zoneCollider = zone.GetComponent<Collider>();
-                if (zoneCollider != null && zoneCollider.bounds.Contains(transform.position))
-                {
-                    playerMovement.moveSpeed = playerMovement.baseMoveSpeed * zone.slowMultiplier;
-
-                    if (playerMovement.animator != null)
-                        playerMovement.animator.speed = zone.slowMultiplier;
-                }
-                else
-                {
-                    playerMovement.moveSpeed = playerMovement.baseMoveSpeed;
-
-                    if (playerMovement.animator != null)
-                        playerMovement.animator.speed = 1f;
-                }
-            }
+            player.MoveSpeed = normalMovementSpeed;
+            player.CanRotate = true;
 
             grabbedObject = null;
             grabbedRb = null;
