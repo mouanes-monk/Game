@@ -44,6 +44,7 @@ public class PlayerDash : MonoBehaviour
     {
         isDashing = true;
         animator.SetBool("isDashing", true);
+<<<<<<< HEAD
 
         float remainingDistance = dashDistance;
 
@@ -64,17 +65,54 @@ public class PlayerDash : MonoBehaviour
                 if (safeDistance > 0f)
                 {
                     transform.position += dashDirection * safeDistance;
+=======
+        
+        float remainingDistance = dashDistance;
+        Vector3 startPosition = transform.position;
+
+        while (remainingDistance > 0 && isDashing)
+        {
+            float moveDistance = Mathf.Min(dashSpeed * Time.deltaTime, remainingDistance);
+            Vector3 proposedPosition = transform.position + dashDirection * moveDistance;
+            
+            if (Physics.CheckBox(
+                proposedPosition + playerCollider.center, 
+                playerCollider.size * 0.5f * (1 - wallStopThreshold),
+                transform.rotation, 
+                collisionLayers))
+            {
+                if (Physics.BoxCast(
+                    transform.position + playerCollider.center, 
+                    playerCollider.size * 0.5f, 
+                    dashDirection, 
+                    out RaycastHit hit, 
+                    transform.rotation, 
+                    moveDistance * 2f,
+                    collisionLayers))
+                {
+                    transform.position = hit.point - dashDirection * 
+                        (playerCollider.size.magnitude * 0.5f + wallStopThreshold);
+>>>>>>> parent of d2920d1 (.....)
                 }
                 break;
             }
 
+<<<<<<< HEAD
             transform.position += dashDirection * moveDistance;
+=======
+            transform.position = proposedPosition;
+>>>>>>> parent of d2920d1 (.....)
             remainingDistance -= moveDistance;
             yield return null;
         }
 
         isDashing = false;
         animator.SetBool("isDashing", false);
+<<<<<<< HEAD
+=======
+        
+        // Start cooldown
+>>>>>>> parent of d2920d1 (.....)
         isOnCooldown = true;
         currentCooldown = dashCooldown;
     }

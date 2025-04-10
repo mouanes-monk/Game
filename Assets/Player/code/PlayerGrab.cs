@@ -7,13 +7,28 @@ public class PlayerGrab : MonoBehaviour
     public Transform buggyHoldPosition;
 
     [Header("Settings")]
+<<<<<<< HEAD
     public float slowMovementSpeed = 2f;
     public float grabRange = 2.5f;
     public float followSpeed = 15f;
     public float holdDistance = 0.5f;
 
+=======
+    public float slowMovementSpeed = 2f;    
+    public float grabRange = 2.5f;          
+    public float followSpeed = 15f;         // Increased for better response
+    public float holdDistance = 0.5f;       // Added hold distance parameter
+
+    private GameObject grabbedObject;      
+    private Rigidbody grabbedRb;           
+    private PlayerMovement playerMovement; 
+    private float normalMovementSpeed;     
+    private bool isHolding = false;        
+    private bool isBuggyBox = false;
+
+>>>>>>> parent of d2920d1 (.....)
     [Header("Animation")]
-    public Animator animator;
+    public Animator animator;              
 
     private GameObject grabbedObject;
     private Rigidbody grabbedRb;
@@ -25,8 +40,13 @@ public class PlayerGrab : MonoBehaviour
     void Start()
     {
         animator = GetComponentInChildren<Animator>();
+<<<<<<< HEAD
         player = GetComponent<PlayerMovement>();
         normalMovementSpeed = player.MoveSpeed;
+=======
+        playerMovement = GetComponent<PlayerMovement>();
+        normalMovementSpeed = playerMovement.moveSpeed;
+>>>>>>> parent of d2920d1 (.....)
 
         if (buggyHoldPosition == null)
         {
@@ -65,8 +85,8 @@ public class PlayerGrab : MonoBehaviour
                 {
                     animator.SetBool("Grab", true);
                     grabbedRb.useGravity = false;
-                    grabbedRb.drag = 10f;
-                    grabbedRb.angularDrag = 10f;
+                    grabbedRb.drag = 10f;              // Added drag for stability
+                    grabbedRb.angularDrag = 10f;       // Added angular drag
 
                     isBuggyBox = grabbedObject.name.ToLower().Contains("buggy");
                     isHolding = true;
@@ -85,11 +105,16 @@ public class PlayerGrab : MonoBehaviour
         Vector3 targetPosition = targetHold.position;
         Vector3 direction = targetPosition - grabbedRb.position;
 
+        // Calculate desired velocity
         Vector3 targetVelocity = direction * followSpeed;
+        
+        // Calculate force needed
         Vector3 force = (targetVelocity - grabbedRb.velocity) * grabbedRb.mass;
-
+        
+        // Apply force while maintaining physics
         grabbedRb.AddForce(force);
-
+        
+        // Maintain distance
         if (direction.magnitude > holdDistance)
         {
             grabbedRb.velocity = direction.normalized * followSpeed;
@@ -106,22 +131,22 @@ public class PlayerGrab : MonoBehaviour
         {
             animator.SetBool("Grab", false);
             grabbedRb.useGravity = true;
-            grabbedRb.drag = 0f;
-            grabbedRb.angularDrag = 0.05f;
+            grabbedRb.drag = 0f;           // Reset drag
+            grabbedRb.angularDrag = 0.05f; // Reset angular drag
 
             isHolding = false;
+<<<<<<< HEAD
             player.MoveSpeed = normalMovementSpeed;
             player.CanRotate = true;
+=======
+            playerMovement.moveSpeed = normalMovementSpeed;
+            playerMovement.canRotate = true;
+>>>>>>> parent of d2920d1 (.....)
 
             grabbedObject = null;
             grabbedRb = null;
             isBuggyBox = false;
         }
-    }
-
-    public bool IsHoldingObject()
-    {
-        return isHolding;
     }
 
     void OnDrawGizmos()

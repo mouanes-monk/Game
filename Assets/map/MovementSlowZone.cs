@@ -34,14 +34,10 @@ public class MovementSlowZone : MonoBehaviour
     {
         if (affectedPlayer != null)
         {
-            PlayerGrab grabScript = affectedPlayer.GetComponent<PlayerGrab>();
-            if (grabScript == null || !grabScript.IsHoldingObject())
-            {
-                affectedPlayer.moveSpeed = affectedPlayer.baseMoveSpeed;
+            affectedPlayer.moveSpeed = affectedPlayer.baseMoveSpeed;
 
-                if (affectedPlayer.animator != null)
-                    affectedPlayer.animator.speed = 1f;
-            }
+            if (affectedPlayer.animator != null)
+                affectedPlayer.animator.speed = 1f;
 
             affectedPlayer = null;
         }
