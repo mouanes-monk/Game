@@ -14,10 +14,8 @@ public class MovementSlowZone : MonoBehaviour
             affectedPlayer = other.GetComponentInParent<PlayerMovement>();
             if (affectedPlayer != null)
             {
-                affectedPlayer.moveSpeed = affectedPlayer.baseMoveSpeed * slowMultiplier;
-
-                if (affectedPlayer.animator != null)
-                    affectedPlayer.animator.speed = slowMultiplier;
+                affectedPlayer.zoneMultiplier = slowMultiplier;
+                affectedPlayer.UpdateMoveSpeed();
             }
         }
     }
@@ -34,11 +32,8 @@ public class MovementSlowZone : MonoBehaviour
     {
         if (affectedPlayer != null)
         {
-            affectedPlayer.moveSpeed = affectedPlayer.baseMoveSpeed;
-
-            if (affectedPlayer.animator != null)
-                affectedPlayer.animator.speed = 1f;
-
+            affectedPlayer.zoneMultiplier = 1f;
+            affectedPlayer.UpdateMoveSpeed();
             affectedPlayer = null;
         }
     }

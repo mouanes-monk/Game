@@ -32,10 +32,11 @@ public class CannonInteraction : MonoBehaviour
         if (isPlayerInRange && player != null)
         {
             PlayerInventory inventory = player.GetComponent<PlayerInventory>();
-            
+
             // Only show prompt if player has fragment
             if (inventory != null && inventory.hasFragment)
             {
+                // Show "Press E to launch" prompt when in range and has fragment
                 if (Input.GetKeyDown(KeyCode.E))
                 {
                     LaunchCannon();
@@ -46,6 +47,11 @@ public class CannonInteraction : MonoBehaviour
                     }
                 }
             }
+            else
+            {
+                // Show "Need fragment!" prompt when the player doesn't have the fragment
+                UpdatePromptVisibility();
+            }
         }
     }
 
@@ -54,7 +60,7 @@ public class CannonInteraction : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerInRange = true;
-            UpdatePromptVisibility();
+            UpdatePromptVisibility();  // Update the prompt when the player enters the trigger
         }
     }
 
@@ -63,19 +69,28 @@ public class CannonInteraction : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerInRange = false;
-            if (interactionPrompt != null) interactionPrompt.gameObject.SetActive(false);
+            if (interactionPrompt != null) interactionPrompt.gameObject.SetActive(false); // Hide prompt when player exits trigger
         }
     }
 
     void UpdatePromptVisibility()
     {
-        if (interactionPrompt != null)
+        if (interactionPrompt != null && player != null)
         {
             PlayerInventory inventory = player.GetComponent<PlayerInventory>();
-            
-            // Only show prompt if player has fragment
-            interactionPrompt.gameObject.SetActive(inventory != null && inventory.hasFragment);
-            interactionPrompt.text = inventory != null && inventory.hasFragment ? promptText : missingFragmentText;
+
+            // Only show the prompt if the player is in range
+            interactionPrompt.gameObject.SetActive(isPlayerInRange);
+
+            // Update the prompt text based on whether the player has the fragment
+            if (inventory != null && inventory.hasFragment)
+            {
+                interactionPrompt.text = promptText; // Show "Press E to launch" if the player has the fragment
+            }
+            else
+            {
+                interactionPrompt.text = missingFragmentText; // Show "Need fragment!" if the player doesn't have the fragment
+            }
         }
     }
 
@@ -84,7 +99,7 @@ public class CannonInteraction : MonoBehaviour
         LaunchBall();
         if (targetObject != null) targetObject.SetActive(false);
         if (targetObject1 != null) targetObject1.SetActive(false);
-        if (interactionPrompt != null) interactionPrompt.gameObject.SetActive(false);
+        if (interactionPrompt != null) interactionPrompt.gameObject.SetActive(false); // Hide prompt after launching cannon
     }
 
     void LaunchBall()

@@ -10,6 +10,7 @@ TagManager:
   - BigRock
   - fragment
   - BuggyBox
+  - ground
   layers:
   - Default
   - TransparentFX
@@ -20,7 +21,7 @@ TagManager:
   - Post
   - obstacleLayer
   - line
-  - 
+  - Ground
   - 
   - 
   - 

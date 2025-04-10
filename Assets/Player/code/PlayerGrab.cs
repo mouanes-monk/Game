@@ -3,30 +3,31 @@ using UnityEngine;
 public class PlayerGrab : MonoBehaviour
 {
     [Header("Hold Positions")]
-    public Transform holdPosition;          
-    public Transform buggyHoldPosition;    
+    public Transform holdPosition;
+    public Transform buggyHoldPosition;
 
     [Header("Settings")]
-    public float slowMovementSpeed = 2f;    
-    public float grabRange = 2.5f;          
-    public float followSpeed = 15f;         // Increased for better response
-    public float holdDistance = 0.5f;       // Added hold distance parameter
+    public float slowMovementMultiplier = 0.4f;
+    public float grabRange = 2.5f;
+    public float followSpeed = 15f;
+    public float holdDistance = 0.5f;
 
-    private GameObject grabbedObject;      
-    private Rigidbody grabbedRb;           
-    private PlayerMovement playerMovement; 
-    private float normalMovementSpeed;     
-    private bool isHolding = false;        
+    // ✅ Fixed this line:
+    public bool IsHolding => grabbedObject != null;
+
+    private GameObject grabbedObject;
+    private Rigidbody grabbedRb;
+    private PlayerMovement playerMovement;
+    private bool isHolding = false;
     private bool isBuggyBox = false;
 
     [Header("Animation")]
-    public Animator animator;              
+    public Animator animator;
 
     void Start()
     {
         animator = GetComponentInChildren<Animator>();
         playerMovement = GetComponent<PlayerMovement>();
-        normalMovementSpeed = playerMovement.moveSpeed;
 
         if (buggyHoldPosition == null)
         {
@@ -67,13 +68,15 @@ public class PlayerGrab : MonoBehaviour
                 {
                     animator.SetBool("Grab", true);
                     grabbedRb.useGravity = false;
-                    grabbedRb.drag = 10f;              // Added drag for stability
-                    grabbedRb.angularDrag = 10f;       // Added angular drag
+                    grabbedRb.drag = 10f;
+                    grabbedRb.angularDrag = 10f;
 
                     isBuggyBox = grabbedObject.name.ToLower().Contains("buggy");
                     isHolding = true;
-                    playerMovement.moveSpeed = slowMovementSpeed;
+
+                    playerMovement.grabMultiplier = slowMovementMultiplier;
                     playerMovement.canRotate = false;
+                    playerMovement.UpdateMoveSpeed();
                 }
             }
         }
@@ -87,16 +90,11 @@ public class PlayerGrab : MonoBehaviour
         Vector3 targetPosition = targetHold.position;
         Vector3 direction = targetPosition - grabbedRb.position;
 
-        // Calculate desired velocity
         Vector3 targetVelocity = direction * followSpeed;
-        
-        // Calculate force needed
         Vector3 force = (targetVelocity - grabbedRb.velocity) * grabbedRb.mass;
-        
-        // Apply force while maintaining physics
+
         grabbedRb.AddForce(force);
-        
-        // Maintain distance
+
         if (direction.magnitude > holdDistance)
         {
             grabbedRb.velocity = direction.normalized * followSpeed;
@@ -113,12 +111,14 @@ public class PlayerGrab : MonoBehaviour
         {
             animator.SetBool("Grab", false);
             grabbedRb.useGravity = true;
-            grabbedRb.drag = 0f;           // Reset drag
-            grabbedRb.angularDrag = 0.05f; // Reset angular drag
+            grabbedRb.drag = 0f;
+            grabbedRb.angularDrag = 0.05f;
 
             isHolding = false;
-            playerMovement.moveSpeed = normalMovementSpeed;
+
+            playerMovement.grabMultiplier = 1f;
             playerMovement.canRotate = true;
+            playerMovement.UpdateMoveSpeed();
 
             grabbedObject = null;
             grabbedRb = null;
