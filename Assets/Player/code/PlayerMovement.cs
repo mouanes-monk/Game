@@ -16,18 +16,26 @@ public class PlayerMovement : MonoBehaviour
 
     public float stepInterval = 0.4f;
     private float stepTimer = 0f;
-public float baseMoveSpeed;
+
+    public float baseMoveSpeed;
     public Transform cameraTransform; // 🎯 Assign this in Inspector!
 
     void Start()
-    {baseMoveSpeed =moveSpeed;
+    {
+        baseMoveSpeed = moveSpeed;
         animator = GetComponentInChildren<Animator>();
         rb = GetComponent<Rigidbody>();
+
+        // ✅ Prevents unwanted rotation but allows physics-based movement
         rb.freezeRotation = true;
+
+        // ✅ Just in case — ensure gravity is enabled
+        rb.useGravity = true;
     }
 
     void Update()
     {
+        // Skip movement when rewinding
         if (GetComponent<PlayerRewind>().isRewinding) return;
 
         float moveX = Input.GetAxisRaw("Horizontal"); // A/Q/D
@@ -59,7 +67,7 @@ public float baseMoveSpeed;
             animator.SetFloat("Speed", 0);
         }
 
-        // 🔄 Smooth rotation toward movement
+        // 🔄 Smooth rotation toward movement direction
         if (canRotate && moveDirection.magnitude > 0.1f)
         {
             Quaternion toRotation = Quaternion.LookRotation(moveDirection);
@@ -69,6 +77,9 @@ public float baseMoveSpeed;
 
     void FixedUpdate()
     {
-        rb.velocity = moveDirection * moveSpeed + new Vector3(0, rb.velocity.y, 0);
+        // ✅ Preserve vertical (Y) velocity to allow gravity to work properly
+        Vector3 currentVelocity = rb.velocity;
+        Vector3 horizontalVelocity = moveDirection * moveSpeed;
+        rb.velocity = new Vector3(horizontalVelocity.x, currentVelocity.y, horizontalVelocity.z);
     }
 }

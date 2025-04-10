@@ -44,52 +44,50 @@ public class PlayerDash : MonoBehaviour
         }
     }
 
-    IEnumerator Dash()
+  IEnumerator Dash()
+{
+    isDashing = true;
+    animator.SetBool("isDashing", true);
+
+    float remainingDistance = dashDistance;
+
+    while (remainingDistance > 0f)
     {
-        isDashing = true;
-        animator.SetBool("isDashing", true);
-        
-        float remainingDistance = dashDistance;
-        Vector3 startPosition = transform.position;
+        float moveDistance = Mathf.Min(dashSpeed * Time.deltaTime, remainingDistance);
 
-        while (remainingDistance > 0 && isDashing)
+        // Perform a box cast to check if there is a collider in the dash direction
+        if (Physics.BoxCast(
+            transform.position + playerCollider.center,
+            playerCollider.size * 0.5f,
+            dashDirection,
+            out RaycastHit hit,
+            transform.rotation,
+            moveDistance,
+            collisionLayers))
         {
-            float moveDistance = Mathf.Min(dashSpeed * Time.deltaTime, remainingDistance);
-            Vector3 proposedPosition = transform.position + dashDirection * moveDistance;
-            
-            if (Physics.CheckBox(
-                proposedPosition + playerCollider.center, 
-                playerCollider.size * 0.5f * (1 - wallStopThreshold),
-                transform.rotation, 
-                collisionLayers))
+            // Stop right before the collider
+            float safeDistance = hit.distance - wallStopThreshold;
+            if (safeDistance > 0f)
             {
-                if (Physics.BoxCast(
-                    transform.position + playerCollider.center, 
-                    playerCollider.size * 0.5f, 
-                    dashDirection, 
-                    out RaycastHit hit, 
-                    transform.rotation, 
-                    moveDistance * 2f,
-                    collisionLayers))
-                {
-                    transform.position = hit.point - dashDirection * 
-                        (playerCollider.size.magnitude * 0.5f + wallStopThreshold);
-                }
-                break;
+                transform.position += dashDirection * safeDistance;
             }
-
-            transform.position = proposedPosition;
-            remainingDistance -= moveDistance;
-            yield return null;
+            break;
         }
 
-        isDashing = false;
-        animator.SetBool("isDashing", false);
-        
-        // Start cooldown
-        isOnCooldown = true;
-        currentCooldown = dashCooldown;
+        // Move character if no obstacle detected
+        transform.position += dashDirection * moveDistance;
+        remainingDistance -= moveDistance;
+        yield return null;
     }
+
+    isDashing = false;
+    animator.SetBool("isDashing", false);
+
+    // Cooldown starts
+    isOnCooldown = true;
+    currentCooldown = dashCooldown;
+}
+
 
     public bool CanDash()
     {
